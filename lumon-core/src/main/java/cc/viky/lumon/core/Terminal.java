@@ -1,11 +1,5 @@
 package  cc.viky.lumon.core;
 
-import java.lang.foreign.FunctionDescriptor;
-import java.lang.foreign.Linker;
-import java.lang.foreign.SymbolLookup;
-import java.lang.foreign.ValueLayout;
-import java.lang.invoke.MethodHandle;
-
 public final class Terminal {
 
     private boolean rawMode = false;
@@ -13,23 +7,19 @@ public final class Terminal {
     private int height = 24;
 
     private static final boolean IS_UNIX = !System.getProperty("os.name").toLowerCase().contains("windows");
-    public boolean isUnix() { return IS_UNIX; }
 
-    private final Linker linker = Linker.nativeLinker();
-    private final SymbolLookup libc = linker.defaultLookup();
+    public void clear() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 
-    private final MethodHandle tcgetattr = linker.downcallHandle(
-            libc.find("tcgetattr").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT,
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS)
-    );
+    public void enterAlternateScreen() {
+        System.out.print("\033[?1049h");
+        System.out.flush();
+    }
 
-    private final MethodHandle tcsetattr = linker.downcallHandle(
-            libc.find("tcsetattr").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT,
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS)
-    );
+    public void exitAlternateScreen() {
+        System.out.print("\033[?1049l");
+        System.out.flush();
+    }
 }
