@@ -10,7 +10,6 @@ public final class Terminal {
     private int height = 24;
 
     private static final Terminal INSTANCE = new Terminal();
-    private static final boolean IS_UNIX = !System.getProperty("os.name").toLowerCase().contains("windows");
 
     // Native Bindings
     private MemorySegment originalTermios;
@@ -59,14 +58,15 @@ public final class Terminal {
     public void enableRawMode() {
         if (rawMode) { return; }
 
-        if (IS_UNIX) {
+        if (Enviroment.IS_UNIX) {
             try (Arena arena = Arena.ofConfined()) {
                 originalTermios = Arena.ofAuto().allocate(60);
                 MemorySegment raw = arena.allocate(60);
                 tcgetattr.invoke(0, originalTermios);
                 raw.copyFrom(originalTermios);
                 int lflag = raw.get(ValueLayout.JAVA_INT, 12);
-                lflag &= ~(0x0002 | 0x0008);
+                int isig = Enviroment.IS_MAC ? 0x00000080 : 0x0001;
+                lflag &= ~(0x0002 | 0x0008 | isig);
                 raw.set(ValueLayout.JAVA_INT, 12, lflag);
                 tcsetattr.invoke(0, 0, raw);
             } catch (Throwable e) {
@@ -81,7 +81,7 @@ public final class Terminal {
     public void disableRawMode() {
         if (!rawMode || originalTermios == null) return;
 
-        if (IS_UNIX) {
+        if (Enviroment.IS_UNIX) {
             try {
                 tcsetattr.invoke(0, 0, originalTermios);
             } catch (Throwable e) {
