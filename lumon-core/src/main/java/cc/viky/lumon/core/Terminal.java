@@ -37,7 +37,6 @@ public final class Terminal {
 
     public void clear() {
         System.out.print("\033[2J");
-        this.moveCursor(0,0);
     }
 
     public void flush(){
