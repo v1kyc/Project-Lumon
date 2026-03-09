@@ -9,7 +9,11 @@ public final class Terminal {
     private int width = 80;
     private int height = 24;
 
+    private Terminal() {}
     private static final Terminal INSTANCE = new Terminal();
+    public static Terminal getInstance() {
+        return INSTANCE;
+    }
 
     // Native Bindings
     private MemorySegment originalTermios;
@@ -28,11 +32,6 @@ public final class Terminal {
                     ValueLayout.JAVA_INT,
                     ValueLayout.ADDRESS)
     );
-
-    private Terminal() {}
-    public static Terminal getInstance() {
-        return INSTANCE;
-    }
 
     public void clear() {
         System.out.print("\033[2J");
